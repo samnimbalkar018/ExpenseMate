@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- SET MONTHLY BUDGET -->
+<div class="card shadow-sm p-3 mb-4">
+  <h5>Set Monthly Budget</h5>
+  <form method="POST" action="/set_budget" class="row g-2">
+    <div class="col-md-4">
+      <input name="monthly_limit" 
+             type="number" 
+             step="0.01" 
+             class="form-control" 
+             placeholder="Enter Monthly Budget"
+             value="{{ budget_limit if budget_limit else '' }}"
+             required>
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-success">Save Budget</button>
+    </div>
+  </form>
+</div>
+
+<!-- SUMMARY CARDS -->
+<div class="row mb-4">
+
+  <div class="col-md-3">
+    <div class="card text-white bg-primary p-3">
+      <h6>Total</h6>
+      <h3>${{ "%.2f"|format(total) }}</h3>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card text-white bg-success p-3">
+      <h6>Budget</h6>
+      <h3>${{ "%.2f"|format(budget_limit) }}</h3>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card text-white bg-info p-3">
+      <h6>Remaining</h6>
+      <h3>${{ "%.2f"|format(remaining) }}</h3>
+    </div>
+  </div>
+
+</div>
+
+<!-- BUDGET PROGRESS -->
+<div class="card mb-4 p-3 shadow-sm">
+  <h5>Budget Usage</h5>
+  <div class="progress">
+    <div class="progress-bar"
+         style="width: {{ 100 if percentage > 100 else percentage }}%">
+      {{ "%.0f"|format(percentage) }}%
+    </div>
+  </div>
+</div>
+
+<!-- SMALL DONUT CHART -->
+<div class="card p-3 shadow-sm mb-4 text-center">
+  <h5>Category Breakdown</h5>
+  <canvas id="chart" 
+          style="max-width: 350px; max-height: 350px; margin:auto;">
+  </canvas>
+</div>
+
+<script>
+const ctx = document.getElementById('chart');
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ labels|tojson }},
+        datasets: [{
+            data: {{ values|tojson }},
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%'
+    }
+});
+</script>
+
+<!-- ADD EXPENSE -->
+<div class="card p-3 shadow-sm">
+  <h5>Add Expense</h5>
+  <form method="POST" action="/add_expense" class="row g-2">
+    <div class="col-md-3">
+      <input name="amount" type="number" step="0.01"
+             class="form-control" placeholder="Amount" required>
+    </div>
+
+    <div class="col-md-3">
+      <select name="category" class="form-select">
+        <option>Food</option>
+        <option>Transport</option>
+        <option>Shopping</option>
+        <option>Bills</option>
+        <option>Entertainment</option>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <input name="description" class="form-control"
+             placeholder="Description">
+    </div>
+
+    <div class="col-md-2">
+      <input name="date" type="date"
+             class="form-control" required>
+    </div>
+
+    <div class="col-md-1">
+      <button class="btn btn-dark w-100">+</button>
+    </div>
+  </form>
+</div>
+
+{% endblock %}
